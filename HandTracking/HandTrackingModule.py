@@ -87,6 +87,31 @@ class handDetector():
 
     return length, img, [x1, y1, x2, y2, cx, cy]
 
+  def overlayPNG(imgBack, imgFront, pos=[0, 0]):
+      hf, wf, cf = imgFront.shape
+      hb, wb, cb = imgBack.shape
+
+      x1, y1 = max(pos[0], 0), max(pos[1], 0)
+      x2, y2 = min(pos[0] + wf, wb), min(pos[1] + hf, hb)
+
+      x1_overlay = 0 if pos[0] >= 0 else -pos[0]
+      y1_overlay = 0 if pos[1] >= 0 else -pos[1]
+
+      wf, hf = x2 - x1, y2 - y1
+
+      if wf <= 0 or hf <= 0:
+          return imgBack
+
+      alpha = imgFront[y1_overlay:y1_overlay + hf, x1_overlay:x1_overlay + wf, 3] / 255.0
+      inv_alpha = 1.0 - alpha
+
+      imgRGB = imgFront[y1_overlay:y1_overlay + hf, x1_overlay:x1_overlay + wf, 0:3]
+
+      for c in range(0, 3):
+          imgBack[y1:y2, x1:x2, c] = imgBack[y1:y2, x1:x2, c] * inv_alpha + imgRGB[:, :, c] * alpha
+
+      return imgBack
+
 def main():
   pTime = 0 
   cTime = 0
